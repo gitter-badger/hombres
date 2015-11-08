@@ -1,11 +1,3 @@
-server:
-  applicationConnectors:
-  - type: http
-    port: 2010
-  adminConnectors:
-  - type: http
-    port: 2011
-
 database:
   driverClass: org.hsqldb.jdbc.JDBCDriver
   url: jdbc:hsqldb:mem:hombres;user=sa;password=sa

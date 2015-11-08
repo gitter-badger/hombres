@@ -19,6 +19,9 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 import static io.dropwizard.testing.ResourceHelpers.*;
 
+import static com.jayway.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
 public class UsersResourceTest {
 
     @ClassRule
@@ -37,9 +40,16 @@ public class UsersResourceTest {
         final Optional<URI> location = Optional.ofNullable(response.getLocation());
         assertTrue(location.isPresent());
 
-        assertEquals(String.format("http://localhost:%d/users/%s", RULE.getLocalPort(), user.getName()), location.get().toString());
+        final String selfLink = String.format("http://localhost:%d/users/%s", RULE.getLocalPort(), user.getName());
+        assertEquals(selfLink, location.get().toString());
 
-        final User retrievedUser = client.target(location.get()).request().get(User.class);
-        assertEquals(user, retrievedUser);
+        given()
+                .port(RULE.getLocalPort())
+        .when()
+                .get(String.format("/users/%s", user.getName()))
+        .then().assertThat()
+                .body("name", is(equalTo(user.getName()))).and()
+                .body("email", is(equalTo(user.getEmail()))).and()
+                .body("links.find { it.rel == 'self' }.href", is(equalTo(selfLink)));
     }
 }

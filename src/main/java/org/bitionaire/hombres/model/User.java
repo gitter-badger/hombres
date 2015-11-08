@@ -9,14 +9,14 @@ import lombok.ToString;
 import org.bitionaire.hombres.resources.UsersResource;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
+import org.glassfish.jersey.linking.InjectLinks;
 
+import javax.ws.rs.core.Link;
 import java.io.Serializable;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @ToString
-@EqualsAndHashCode(exclude = {"id"})
+@EqualsAndHashCode(exclude = { "id" })
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,15 +26,16 @@ public class User implements Serializable {
     @Getter private final String name;
     @Getter private final String email;
 
-    @JsonIgnore
-    @InjectLink(
-            resource = UsersResource.class,
-            style = InjectLink.Style.ABSOLUTE,
-            method = "get",
-            bindings = @Binding(name = "id", value = "${instance.id}"),
-            rel = "self"
-    )
-    @Getter private transient URI selfLink;
+    @InjectLinks({
+            @InjectLink(
+                    resource = UsersResource.class,
+                    style = InjectLink.Style.ABSOLUTE,
+                    method = "get",
+                    bindings = @Binding(name = "id", value = "${instance.id}"),
+                    rel = "self"
+            )
+    })
+    @Getter private transient List<Link> links;
 
     public User(final String id, final String name, final String email) {
         this.id = id;
@@ -48,12 +49,6 @@ public class User implements Serializable {
         this.id = null;
         this.name = name;
         this.email = email;
-    }
-
-    public List<Link> getLinks() {
-        return new ArrayList<Link>() {{
-            add(new Link("self", selfLink));
-        }};
     }
 
 }
